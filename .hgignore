@@ -1,0 +1,11 @@
+syntax: glob
+.project
+.pydevproject
+.settings
+ckanext_comments.egg-info
+build
+dist
+*~
+*.pyc
+
+

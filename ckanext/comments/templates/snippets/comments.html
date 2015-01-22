@@ -1,0 +1,152 @@
+{#-
+This snippet offers everything you need for proxying comments to and from a WordPress database.
+
+package_name:
+	Name (slug) of the dataset.
+
+Usage example:
+	{% snippet 'snippets/comments.html', package_name = pkg_dict.name %}
+
+-#}
+{%- resource "comment_/jquery.js" -%}
+{%- resource "comment_scripts/jquery.xmlrpc.js" -%}
+{%- resource "comment_scripts/jquery.comments.js" -%}
+
+<h3 class="subtitles">{{ _('Comments') }}</h3>
+
+{#- @todo Move contents of this helper into this template? -#}
+{{ h.comments() }}
+
+<div style="display:none" id="report-container">
+	<div id="report-top"></div>
+	<h4>{{ _('Report inappropriate content') }}</h4>
+	<p>{{ _('Tell us, why this content should be removed.') }}</p>
+	<form id="report-form" action="' . $target .'" method="post">
+		<input type="hidden" name="comment_ID" id="comment_ID" />
+		<textarea rows="5" cols="20" name="reporttext"></textarea>
+		<p><label for="report-email">{{ _('Your e-mail address') }}</label></p>
+		<input type="text" class="text" size="30" name="report-email" id="report-email" />
+		<input class="report-comment-submit" type="submit" value="{{ _('Submit') }}" />
+	</form>
+</div>
+
+{#- @todo Make a jQuery plugin off this javascript code. -#}  
+<script type="text/javascript">
+
+/** Use our plugin for creating a new comment through XML-RPC API. */
+function newComment() {
+	
+	var content        = $("#comment").val();
+	var author         = $("#author").val();
+	var author_email   = $("#email").val();
+	var comment_parent = $("#comment_parent").val();
+	var user_id        = $("#user_id").val();
+	
+	var options = {'newcomment': true, 'comment_parent': comment_parent, 'content': content, 'author': author, 'author_url': '', 'author_email': author_email, 'user_id': user_id};
+	
+	$.comments(options);
+}
+
+function subscriptionButton() {
+	
+	var email   = $("#hri_subscribe_email").val();
+	var options = {'email': email};
+	
+	if($('#hri_subscribe_option1:checked').val()) {
+		
+		options.subscribe = true;
+	}
+	else if($('#hri_subscribe_option2:checked').val()) {
+		
+		options.unsubscribe = true;
+	}
+	else if($('#hri_subscribe_option3:checked').val()) {
+		
+		options.unsubscribeall = true;
+	}
+	else {
+		
+		return false;
+	}
+
+	$.comments(options);
+}
+
+function respondToComment(comment_id) {
+
+	$("#comment_parent").val(comment_id);
+	// http://stackoverflow.com/questions/6677035/jquery-scroll-to-element
+	$('html, body').animate({ scrollTop: $("#respond").offset().top }, 2000);
+
+	$("#cancel-comment-reply-link").show();
+}
+
+function cancelCommentResponse() {
+
+	$("#comment_parent").val(0);
+	// http://stackoverflow.com/questions/6677035/jquery-scroll-to-element
+	$('html, body').animate({ scrollTop: $("#comments").offset().top }, 2000);
+
+	$("#cancel-comment-reply-link").hide();
+}
+
+/** Move the hri_radio_checked class to the correct div container. */
+function hriRadioCheckLabel(elem) {
+	hriRadioCheck($(elem).attr("for"));
+}
+
+function hriRadioCheckInputDiv(elem) {
+	hriRadioCheck($(elem).children().first().attr("id"));
+}
+
+function hriRadioCheck(input_id) {
+	
+	// Remove the check from all other 
+	$(".hri_subscribe_option").parent().removeClass("hri_radio_checked");
+
+	// Find the input, then its container div.
+	var container_div = $("#" + input_id).parent();
+	
+	$(container_div).addClass("hri_radio_checked");
+}
+
+function toggleSubscribeContent() {
+
+	$('#subscribe_content').toggle();
+	$('#comment_subscribe_link').toggle();
+}
+
+function reporting(element) {
+
+	if( $(element).hasClass('report-cancel') ) {
+
+		$('.report-comment, #respond').show();
+		$(element).text("{{ _('Report inappropriate content') }}").removeClass('report-cancel').parent().parent().removeClass('report-target');
+		$('.comment-reply-link').show();
+
+		$('#report-container').hide();
+		$('#comment_ID').val('');
+
+	} else {
+
+		$('.report-comment').not( $(element) ).hide();
+		$(element).text("{{ _('Cancel') }}").addClass('report-cancel').parent().parent().addClass('report-target');
+		$('.comment-reply-link, #respond').hide();
+
+		if(HRI_LANG && HRI_LANG === 'en') {
+
+			target = 'http://' + wordpress_url + '/en/report-comment/';
+			hri_blog = 2;
+		}
+		else {
+
+			target = 'http://' + wordpress_url + '/fi/ilmoita-kommentti/';
+			hri_blog = 1;
+		}
+
+		$('#report-container').appendTo( $(element).parent() ).show();
+		$('#comment_ID').val( $(element).attr('id').substr(7) + '-' + hri_blog);
+		$('#report-form').attr('action', target);
+	}
+}
+</script>
