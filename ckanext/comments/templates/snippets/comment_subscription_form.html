@@ -1,0 +1,45 @@
+{#-
+This helper function creates a HTML-form for subscribing to a given dataset's comments.
+
+This functionality is HRI specific. Utilizing this feature requires you to have "subcsribe to comments reloaded" plugin for WordPress set up in such a way that this form's submit matches one made with the plugin.
+
+action_url:
+	The target URL for the form's submit
+
+Usage example:
+	{% snippet 'snippets/comment_subscription_form.html', action_url = 'http://' + h.wordpress_url() + '/fi/tilaa-kommentit/' %}
+
+    where h.wordpress_url() provides the URL of your WordPress installation
+-#}
+
+<a id="comment_subscribe_link" onClick="toggleSubscribeContent();">{{ _('Email notification on new comments: subscribe or unsubscribe.') }}</a>
+<div id="subscribe_content" style="display:none">
+<form action="" method="post">
+    <a id="subscribe_toggle_close" class="bold right" onClick="toggleSubscribeContent();">{{ _('Close') }}</a>
+    <div class="row">
+        <label for="hri_subscribe_email" style="float: left; margin-top: 7px;">{{ _('Email') }}</label>
+        <span class="required" style="float: left; margin: 0px 10px;">*</span>
+        <input class="text" id="hri_subscribe_email" type="email" required="required" size="30" value="" name="hri_subscribe_email" style="float: left;" />
+    </div>
+    <div class="row">
+        <div class="hri_radio hri_radio_checked" onclick="hriRadioCheckInputDiv(this);">
+            <input checked="checked" class="hri_subscribe_option radio" type="radio" name="hri_subscribe_option" id="hri_subscribe_option1" value="1">
+        </div>
+        <label class="hri_subscribe_label" for="hri_subscribe_option1" onclick="hriRadioCheckLabel(this);">{{ _('Subscribe to notifications on new messages to this thread') }}</label>
+
+        <div class="hri_radio" onclick="hriRadioCheckInputDiv(this);">
+            <input class="hri_subscribe_option radio" type="radio" name="hri_subscribe_option" id="hri_subscribe_option2" value="2">
+        </div>
+        <label class="hri_subscribe_label" for="hri_subscribe_option2" onclick="hriRadioCheckLabel(this);">{{ _('Unsubscribe from notifications on this thread') }}</label>
+
+        <div class="hri_radio" onclick="hriRadioCheckInputDiv(this);">
+            <input class="hri_subscribe_option radio hri_subscribe_option_top_margin" type="radio" name="hri_subscribe_option" id="hri_subscribe_option3" value="3">
+        </div>
+        <label class="hri_subscribe_label" class="hri_subscribe_option_top_margin" for="hri_subscribe_option3" onclick="hriRadioCheckLabel(this);">{{ _('Unsubscribe from notifications on all discussions on HRI') }}</label>
+
+        <br class="clear">
+
+        <input class="plus-submit" type="button" name="hri_subscribe_submit" id="hri_subscribe_submit" value="{{ _('Submit') }}" onClick="subscriptionButton();" />
+    </div>
+</form>
+</div>

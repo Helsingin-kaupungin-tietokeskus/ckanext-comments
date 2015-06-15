@@ -1,11 +1,27 @@
 {#-
 This snippet offers everything you need for proxying comments to and from a WordPress database.
 
+This snippet is HRI specific but can be used as a base for utilizing this plugin.
+Note the use of helpers h.wordpress_url() and h.get_user_wp_id().
+
 package_name:
 	Name (slug) of the dataset.
+wp_url:
+	URL of your WordPress installation.
+comment_subscribing:
+	True/False for enabĺing/disabling comment subscription feature. Effectively HRI specific.
+subscription_action_url:
+	Form target for comment subscription, related to the setting above. HRI specific.
+wordpress_user_id:
+	Logged in user's ID from WordPress or False.
 
-Usage example:
-	{% snippet 'snippets/comments.html', package_name = pkg_dict.name %}
+Usage example with no HRI specific features:
+	{% snippet 'snippets/comments.html', package_name = pkg_dict.name, wp_url = 'www.your.wordpress.installati.on', comment_subscribing = False, subscription_action_url = '', wordpress_user_id = False %}
+
+	Note that wordpress_user_id may still be set to allow for user related commenting.
+
+Usage example with all HRI specific features:
+	{% snippet 'snippets/comments.html', package_name = pkg_dict.name, wp_url = h.wordpress_url(), comment_subscribing = True, subscription_action_url = 'http://' + h.wordpress_url() + '/fi/tilaa-kommentit/', wordpress_user_id = h.get_user_id_wp() %}
 
 -#}
 {%- resource "comment_/jquery.js" -%}
@@ -14,23 +30,15 @@ Usage example:
 
 <h3 class="subtitles">{{ _('Comments') }}</h3>
 
-{#- @todo Move contents of this helper into this template? -#}
-{{ h.comments() }}
-
-<div style="display:none" id="report-container">
-	<div id="report-top"></div>
-	<h4>{{ _('Report inappropriate content') }}</h4>
-	<p>{{ _('Tell us, why this content should be removed.') }}</p>
-	<form id="report-form" action="' . $target .'" method="post">
-		<input type="hidden" name="comment_ID" id="comment_ID" />
-		<textarea rows="5" cols="20" name="reporttext"></textarea>
-		<p><label for="report-email">{{ _('Your e-mail address') }}</label></p>
-		<input type="text" class="text" size="30" name="report-email" id="report-email" />
-		<input class="report-comment-submit" type="submit" value="{{ _('Submit') }}" />
-	</form>
+<div id="comments">
+	{% snippet 'snippets/comment_list.html', ajax_loader_gif = '/fi/wp-content/themes/hri2/img/ajax-loader2.gif' %}
+	{% if comment_subscribing %}
+		{% snippet 'snippets/comment_subscription_form.html', action_url = subscription_action_url %}
+	{% endif %}
+	{% snippet 'snippets/commenting_form.html', wordpress_user_id = wordpress_user_id, comment_subscribing = comment_subscribing %}
+	{% snippet 'snippets/comment_reporting_form.html' %}
 </div>
 
-{#- @todo Make a jQuery plugin off this javascript code. -#}  
 <script type="text/javascript">
 
 /** Use our plugin for creating a new comment through XML-RPC API. */
@@ -133,20 +141,9 @@ function reporting(element) {
 		$(element).text("{{ _('Cancel') }}").addClass('report-cancel').parent().parent().addClass('report-target');
 		$('.comment-reply-link, #respond').hide();
 
-		if(HRI_LANG && HRI_LANG === 'en') {
-
-			target = 'http://' + wordpress_url + '/en/report-comment/';
-			hri_blog = 2;
-		}
-		else {
-
-			target = 'http://' + wordpress_url + '/fi/ilmoita-kommentti/';
-			hri_blog = 1;
-		}
-
 		$('#report-container').appendTo( $(element).parent() ).show();
-		$('#comment_ID').val( $(element).attr('id').substr(7) + '-' + hri_blog);
-		$('#report-form').attr('action', target);
+
+		setCommentReportingCommentIdAndAction(element);
 	}
 }
 </script>

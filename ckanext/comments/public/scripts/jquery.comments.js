@@ -18,6 +18,7 @@
 		wordpress_password:  "guest",
 		xmlrpcurl:           "",
 		commentlist:         ".commentlist",
+		blog_id:             "1",
 		packagename:         undefined,
 		post_id:             undefined,
 		appendcomment:       appendComment,
@@ -29,6 +30,7 @@
 		commentnotification: commentNotification,
 		// Callbacks - notification
 		oncommentsuccess:    function() {},
+		parselocalizeddate:  dateFromFinnishDate,
 		avatar_src:          "http://1.gravatar.com/avatar/ff6e45f35764ad62117d3b14490799c9?s=30&d=http%3A%2F%2Fwww.gravatar.com%2Favatar%2Fad516503a11cd5ca435acc9bb6523536%3Fs%3D30&r=G",
 		phrases:             {
 			no_wp_id_found:    "Commenting is unavailable for this dataset.",
@@ -186,7 +188,7 @@
 
 	function appendComment(settings, item) {
 
-		var date_gmt = dateFromFinnishDate(item.date_created_gmt);
+		var date_gmt = settings.parselocalizeddate(item.date_created_gmt);
 		var date = new Date();
 		date.setTime(date_gmt.getTime() - date_gmt.getTimezoneOffset() * 60 * 1000);
 		var minutes = date.getMinutes();
@@ -275,8 +277,8 @@
 		// Order these comments by creation date.
 		comments_for_this_parent.sort(function(a, b) { 
 
-			var b_created = dateFromFinnishDate(b.created);
-			var a_created = dateFromFinnishDate(a.created);
+			var b_created = settings.parselocalizeddate(b.created);
+			var a_created = settings.parselocalizeddate(a.created);
 
 			return -(b_created - a_created);
 		});
@@ -370,7 +372,7 @@
 			$.xmlrpc({
 				url: settings.xmlrpcurl + '/xmlrpc.php',
 				methodName: 'hri.getComments',
-				params: ['1', settings.wordpress_username, settings.wordpress_password, {'post_id': settings.post_id}],
+				params: [settings.blog_id, settings.wordpress_username, settings.wordpress_password, {'post_id': settings.post_id}],
 				success: function(response, status, jqXHR) { 
 					
 					// Group the comments to a new object like so.
@@ -406,7 +408,7 @@
 		$.xmlrpc({
 			url: settings.xmlrpcurl + '/xmlrpc.php',
 			methodName: 'hri.newComment',
-			params: ['1', settings.wordpress_username, settings.wordpress_password, settings.post_id, {'comment_parent': comment_parent, 'content': content, 'author': author, 'author_url': author_url, 'author_email': author_email, 'user_id': user_id}],
+			params: [settings.blog_id, settings.wordpress_username, settings.wordpress_password, settings.post_id, {'comment_parent': comment_parent, 'content': content, 'author': author, 'author_url': author_url, 'author_email': author_email, 'user_id': user_id}],
 			success: function(response, status, jqXHR) { 
 			
 				getComments(settings);

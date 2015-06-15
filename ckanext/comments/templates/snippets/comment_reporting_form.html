@@ -1,0 +1,19 @@
+{#-
+Reporting form for inappropriate comments.
+
+Usage example:
+	{% snippet 'snippets/comment_reporting_form.html' %}
+
+-#}
+<div style="display:none" id="report-container">
+	<div id="report-top"></div>
+	<h4>{{ _('Report inappropriate content') }}</h4>
+	<p>{{ _('Tell us, why this content should be removed.') }}</p>
+	<form id="report-form" method="post">
+		<input type="hidden" name="comment_ID" id="comment_ID" />
+		<textarea rows="5" cols="20" name="reporttext"></textarea>
+		<p><label for="report-email">{{ _('Your e-mail address') }}</label></p>
+		<input type="text" class="text" size="30" name="report-email" id="report-email" />
+		<input class="report-comment-submit" type="submit" value="{{ _('Submit') }}" />
+	</form>
+</div>

@@ -1,0 +1,12 @@
+{#-
+This trivial snippet sets up an element for populating comments into
+
+ajax_loader_gif:
+	Full URL pointing to your Ajax loader gif (or image in general) of choice
+
+Usage example:
+	{% snippet 'snippets/comment_list.html', ajax_loader_gif = '/fi/wp-content/themes/hri2/img/ajax-loader2.gif' %}
+
+-#}
+
+<ol class='commentlist'><img src='{{ ajax_loader_gif }}' id='comment-loader' width='180'></ol>

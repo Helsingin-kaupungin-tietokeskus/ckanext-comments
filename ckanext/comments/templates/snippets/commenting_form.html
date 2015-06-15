@@ -1,0 +1,48 @@
+{#-
+Commenting form.
+
+wordpress_user_id:
+	User's id in WordPress, or False.
+comment_subscribing:
+	Is subscribing to comments enabled True/False. HRI specific feature.
+
+Usage example:
+	{% snippet 'snippets/commenting_form.html', wordpress_user_id = h.get_user_wp_id(), comment_subscribing = True %}
+
+-#}
+<div id="respond">
+	<h3 id="reply-title">
+		{{ _('Make a Comment') }}
+		<small><a rel="nofollow" id="cancel-comment-reply-link" onclick="cancelCommentResponse();" href="#comments" style="display:none;">{{ _('Cancel reply') }}</a></small>
+	</h3>
+	<form action="/wp-comments-post.php" method="post" id="commentform-rate"> <input type="hidden" name="lang" value="fi" /> <input type="hidden" id="hri-blog" value="1" />
+        {% if wordpress_user_id %}
+            <input class="" id="email" name="email" hidden="hidden" style="display: none" value="" />
+            <input class="" id="author" name="author" hidden="hidden" style="display: none" value="" />
+            <input class="" id="user_id" name="user_id" hidden="hidden" style="display: none" value="{{ wordpress_user_id }}" />
+        {% else %}
+            {{ _("Your e-mail won't be made public. Mandatory fields are marked with a *.") }}
+            <p class="comment-form-author"><label for="author">{{ _('Name') }}<span class="required">*</span></label> <input class="text" id="author" name="author" type="text" value="" size="30" /></p>
+            <p class="comment-form-email"><label for="email">{{ _('Email') }}<span class="required">*</span></label> <input class="text" id="email" name="email" type="email" value="" size="30" /></p>
+            <input class="" id="user_id" name="user_id" hidden="hidden" style="display: none" value="" />
+        {% endif %}
+        <p class="comment-form-comment">
+        	<label for="comment">{{ _('Comment') }}</label>
+        	<textarea id="comment" name="comment" cols="45" rows="8" aria-required="true"></textarea>
+        </p>
+        {% if comment_subscribing %}
+        <p>
+        	<label for='subscribe-reloaded'>
+        		<input style='width:30px' type='checkbox' name='subscribe-reloaded' id='subscribe-reloaded' value='yes' />
+        		{{ _('Order new comments to your e-mail.') }}
+        	</label>
+        </p> 
+        {% endif %}
+        <p class="form-submit">
+        	<input name="submit" type="button" id="comment_button" value="{{ _('Submit Comment') }}" onClick="newComment()" />
+        	<input type='hidden' name='comment_post_ID' value='' id='comment_post_ID' />
+        	<input type='hidden' name='comment_parent' id='comment_parent' value='0' />
+        </p>
+    </form> 
+</div><!-- #respond -->
+<noscript><a id="#commentform"></a>{{ _('Commenting requires JavaScript.') }}</noscript><!--<div id="hri_subscribe_toggle">-->
